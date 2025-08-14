@@ -1,6 +1,7 @@
 package ru.fakhriev.calculator
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,6 +17,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -23,6 +25,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+
+val expression = mutableStateOf("45x8")
+val result = mutableStateOf("360")
 
 @Composable
 fun Calculator(
@@ -48,13 +53,13 @@ fun Calculator(
             horizontalAlignment = Alignment.End
         ) {
             Text(
-                text = "45x8",
+                text = expression.value,
                 fontSize = 36.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onPrimaryContainer
             )
             Text(
-                text = "360",
+                text = result.value,
                 fontSize = 17.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onBackground
@@ -104,8 +109,12 @@ fun Calculator(
                         }
                         Box(
                             modifier = Modifier
-                                .weight(weight)
                                 .clip(CircleShape)
+                                .clickable { if (label == "AC") {
+                                    expression.value = ""
+                                    result.value = ""
+                                } }
+                                .weight(weight)
                                 .background(color)
                                 .aspectRatio(weight),
                             contentAlignment = Alignment.Center
