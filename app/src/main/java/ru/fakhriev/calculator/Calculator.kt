@@ -17,7 +17,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -26,13 +25,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-val expression = mutableStateOf("45x8")
-val result = mutableStateOf("360")
+val viewModel = CalculatorViewModel()
 
 @Composable
 fun Calculator(
     modifier: Modifier = Modifier
 ) {
+    val state = viewModel.state.value
     Column(modifier = modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Column(
@@ -53,13 +52,13 @@ fun Calculator(
             horizontalAlignment = Alignment.End
         ) {
             Text(
-                text = expression.value,
+                text = state.expression,
                 fontSize = 36.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onPrimaryContainer
             )
             Text(
-                text = result.value,
+                text = state.result,
                 fontSize = 17.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onBackground
@@ -67,7 +66,7 @@ fun Calculator(
         }
 
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
-            val symbols = arrayOf("√", "π", "^", "!")
+            val symbols = arrayOf(Symbol.SQRT, Symbol.PI, Symbol.POWER, Symbol.FACTORIAL)
             symbols.forEach { s ->
                 Button(
                     onClick = {},
@@ -76,7 +75,7 @@ fun Calculator(
                         contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                 ) {
-                    Text(s, fontSize = 32.sp, fontWeight = FontWeight.SemiBold)
+                    Text(s.value, fontSize = 32.sp, fontWeight = FontWeight.SemiBold)
                 }
             }
         }
@@ -88,11 +87,11 @@ fun Calculator(
             val secondary = MaterialTheme.colorScheme.secondary
             val tertiary = MaterialTheme.colorScheme.tertiary
             val first =
-                arrayOf("AC" to secondary, "( )" to tertiary, "%" to tertiary, "÷" to tertiary)
-            val second = arrayOf("7" to primary, "8" to primary, "9" to primary, "X" to tertiary)
-            val third = arrayOf("4" to primary, "5" to primary, "6" to primary, "-" to tertiary)
-            val fourth = arrayOf("1" to primary, "2" to primary, "3" to primary, "+" to tertiary)
-            val fifth = arrayOf("0" to primary, "," to primary, "=" to tertiary)
+                arrayOf(Symbol.AC to secondary, Symbol.PARENTHESIS to tertiary, Symbol.PERCENT to tertiary, Symbol.DIVIDE to tertiary)
+            val second = arrayOf(Symbol.DIGIT_7 to primary, Symbol.DIGIT_8 to primary, Symbol.DIGIT_9 to primary, Symbol.MULTIPLY to tertiary)
+            val third = arrayOf(Symbol.DIGIT_4 to primary, Symbol.DIGIT_5 to primary, Symbol.DIGIT_6 to primary, Symbol.SUBTRACT to tertiary)
+            val fourth = arrayOf(Symbol.DIGIT_1 to primary, Symbol.DIGIT_2 to primary, Symbol.DIGIT_3 to primary, Symbol.ADD to tertiary)
+            val fifth = arrayOf(Symbol.DIGIT_0 to primary, Symbol.DOT to primary, Symbol.EQUALS to tertiary)
             val columnLabels = arrayOf(first, second, third, fourth, fifth)
             columnLabels.forEachIndexed { indexParent, columns ->
                 Row(
@@ -110,17 +109,16 @@ fun Calculator(
                         Box(
                             modifier = Modifier
                                 .clip(CircleShape)
-                                .clickable { if (label == "AC") {
-                                    expression.value = ""
-                                    result.value = ""
-                                } }
+                                .clickable {
+                                    viewModel.processCommand(CalculatorCommand.Input(pair.first))
+                                }
                                 .weight(weight)
                                 .background(color)
                                 .aspectRatio(weight),
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                text = label,
+                                text = label.value,
                                 fontSize = 26.sp, color = MaterialTheme.colorScheme.onBackground
                             )
                         }
