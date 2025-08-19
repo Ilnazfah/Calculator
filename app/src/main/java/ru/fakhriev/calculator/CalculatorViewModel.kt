@@ -1,22 +1,23 @@
 package ru.fakhriev.calculator
 
-import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.ViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
-class CalculatorViewModel {
-    val state = mutableStateOf(
-        Display(
-            expression = "45x8",
-            result = "360"
-        )
+class CalculatorViewModel: ViewModel() {
+    private val _state: MutableStateFlow<CalculatorState> = MutableStateFlow(
+        CalculatorState.Initial
     )
+
+    val state = _state.asStateFlow()
 
     fun processCommand(command: CalculatorCommand) {
         when(command) {
             CalculatorCommand.Clear -> {
-
+                _state.value = CalculatorState.Initial
             }
             CalculatorCommand.Evaluate -> {
-
+                _state.value = CalculatorState.Success("")
             }
             is CalculatorCommand.Input -> {
                 when(command.symbol) {
@@ -35,18 +36,25 @@ class CalculatorViewModel {
                     Symbol.MULTIPLY -> {}
                     Symbol.DIVIDE -> {}
                     Symbol.PERCENT -> {}
-                    Symbol.POWER -> {}
-                    Symbol.FACTORIAL -> {}
-                    Symbol.SQRT -> {}
-                    Symbol.PI -> {}
                     Symbol.DOT -> {}
                     Symbol.PARENTHESIS -> {}
-                    Symbol.AC -> { state.value = Display("", "") }
-                    Symbol.EQUALS -> {}
                 }
             }
         }
     }
+}
+
+sealed interface CalculatorState{
+    data object Initial: CalculatorState
+
+    data class Input(
+        val expression: String,
+        val result: String
+    ): CalculatorState
+
+    data class Success(val result: String): CalculatorState
+
+    data class Error(val expression: String): CalculatorState
 }
 
 sealed interface CalculatorCommand {
@@ -72,14 +80,8 @@ enum class Symbol(val value: String) {
     MULTIPLY("X"),
     DIVIDE("/"),
     PERCENT("%"),
-    POWER("^"),
-    FACTORIAL("!"),
-    SQRT(""),
-    PI("^"),
     DOT(","),
-    PARENTHESIS("( )"),
-    AC("AC"),
-    EQUALS("=")
+    PARENTHESIS("( )")
 }
 
 data class Display(
