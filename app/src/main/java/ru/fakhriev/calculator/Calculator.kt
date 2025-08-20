@@ -110,16 +110,16 @@ fun Calculator(
         }
 
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
-            val topSymbols = arrayOf("√", "π", "^", "!")
-            topSymbols.forEach { s ->
+            val topSymbols = arrayOf(Symbol.SQRT, Symbol.PI, Symbol.POWER, Symbol.FACTORIAL)
+            topSymbols.forEach { symbol ->
                 Button(
-                    onClick = { },
+                    onClick = { viewModel.processCommand(CalculatorCommand.Input(symbol)) },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color.Transparent,
                         contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                 ) {
-                    Text(s, fontSize = 32.sp, fontWeight = FontWeight.SemiBold)
+                    Text(symbol.value, fontSize = 32.sp, fontWeight = FontWeight.SemiBold)
                 }
             }
         }

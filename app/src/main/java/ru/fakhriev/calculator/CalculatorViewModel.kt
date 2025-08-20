@@ -3,6 +3,7 @@ package ru.fakhriev.calculator
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import org.mariuszgromada.math.mxparser.Expression
 
 class CalculatorViewModel : ViewModel() {
     private val _state: MutableStateFlow<CalculatorState> = MutableStateFlow(
@@ -21,7 +22,12 @@ class CalculatorViewModel : ViewModel() {
             }
 
             CalculatorCommand.Evaluate -> {
-                _state.value = CalculatorState.Success("")
+                val result = evaluate()
+                _state.value = if (result != null) {
+                    CalculatorState.Success(result)
+                } else {
+                    CalculatorState.Error(expression)
+                }
             }
 
             is CalculatorCommand.Input -> {
@@ -34,7 +40,7 @@ class CalculatorViewModel : ViewModel() {
 
                 _state.value = CalculatorState.Input(
                     expression = expression,
-                    result = "100"
+                    result = evaluate() ?: ""
                 )
             }
         }
@@ -49,6 +55,14 @@ class CalculatorViewModel : ViewModel() {
             openCount > closeCount -> ")"
             else -> "("
         }
+    }
+
+    private fun evaluate(): String? {
+        return expression.replace('x', '*')
+            .replace(',', '.')
+            .let { Expression(it) }
+            .calculate()
+            .takeIf { it.isFinite() } ?.toString()
     }
 
 }
@@ -96,8 +110,3 @@ enum class Symbol(val value: String) {
     DOT(","),
     PARENTHESIS("()")
 }
-
-data class Display(
-    val expression: String,
-    val result: String
-)
