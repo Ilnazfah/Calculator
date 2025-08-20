@@ -4,57 +4,66 @@ import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-class CalculatorViewModel: ViewModel() {
+class CalculatorViewModel : ViewModel() {
     private val _state: MutableStateFlow<CalculatorState> = MutableStateFlow(
         CalculatorState.Initial
     )
 
     val state = _state.asStateFlow()
 
+    private var expression = ""
+
     fun processCommand(command: CalculatorCommand) {
-        when(command) {
+        when (command) {
             CalculatorCommand.Clear -> {
+                expression = ""
                 _state.value = CalculatorState.Initial
             }
+
             CalculatorCommand.Evaluate -> {
                 _state.value = CalculatorState.Success("")
             }
+
             is CalculatorCommand.Input -> {
-                when(command.symbol) {
-                    Symbol.DIGIT_0 -> {}
-                    Symbol.DIGIT_1 -> {}
-                    Symbol.DIGIT_2 -> {}
-                    Symbol.DIGIT_3 -> {}
-                    Symbol.DIGIT_4 -> {}
-                    Symbol.DIGIT_5 -> {}
-                    Symbol.DIGIT_6 -> {}
-                    Symbol.DIGIT_7 -> {}
-                    Symbol.DIGIT_8 -> {}
-                    Symbol.DIGIT_9 -> {}
-                    Symbol.ADD -> {}
-                    Symbol.SUBTRACT -> {}
-                    Symbol.MULTIPLY -> {}
-                    Symbol.DIVIDE -> {}
-                    Symbol.PERCENT -> {}
-                    Symbol.DOT -> {}
-                    Symbol.PARENTHESIS -> {}
+                val symbol = if (command.symbol != Symbol.PARENTHESIS) {
+                    command.symbol.value
+                } else {
+                    getCorrectParenthesis()
                 }
+                expression += symbol
+
+                _state.value = CalculatorState.Input(
+                    expression = expression,
+                    result = "100"
+                )
             }
         }
     }
+
+    private fun getCorrectParenthesis(): String {
+        val openCount = expression.count { it == '(' }
+        val closeCount = expression.count { it == ')' }
+        return when {
+            expression.isEmpty() -> "("
+            expression.last().let { !it.isDigit() && it != ')' && it != 'π' } -> "("
+            openCount > closeCount -> ")"
+            else -> "("
+        }
+    }
+
 }
 
-sealed interface CalculatorState{
-    data object Initial: CalculatorState
+sealed interface CalculatorState {
+    data object Initial : CalculatorState
 
     data class Input(
         val expression: String,
         val result: String
-    ): CalculatorState
+    ) : CalculatorState
 
-    data class Success(val result: String): CalculatorState
+    data class Success(val result: String) : CalculatorState
 
-    data class Error(val expression: String): CalculatorState
+    data class Error(val expression: String) : CalculatorState
 }
 
 sealed interface CalculatorCommand {
@@ -77,11 +86,15 @@ enum class Symbol(val value: String) {
     DIGIT_9("9"),
     ADD("+"),
     SUBTRACT("-"),
-    MULTIPLY("X"),
-    DIVIDE("/"),
+    MULTIPLY("x"),
+    DIVIDE("÷"),
     PERCENT("%"),
+    POWER("^"),
+    FACTORIAL("!"),
+    SQRT("√"),
+    PI("π"),
     DOT(","),
-    PARENTHESIS("( )")
+    PARENTHESIS("()")
 }
 
 data class Display(
